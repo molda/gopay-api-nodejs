@@ -14,12 +14,12 @@ var opts = {}
 var ready = false;
 var apiUrl = 'https://gate.gopay.cz/api';
 
-/*
+/**
  *  Init
  *
  *  @param clientID 
  *  @param clientSecret 
- *
+ *  @public
  */
 
 exports.init = function(options, isDebug) {
@@ -47,17 +47,17 @@ exports.getStatus = getStatus;
 exports.Payment = Payment;
 
 
-/*
+/**
  *  Get token
  *
  *  @param scope [optional] default 'payment-create', posssible values are 'payment-all' or 'payment-create'
  *  @param callback Function to call after response recieved callback(err, data);
+ *  @public
  *  
- *  Response data object
- *  @param token_type   =bearer
- *  @param access_token =<new-token>
- *  @param expires_in   =1800
- *
+ *      Response data object
+ *      @param token_type   =bearer
+ *      @param access_token =<new-token>
+ *      @param expires_in   =1800
  */
 
 function getToken(scope, callback) {
@@ -94,34 +94,13 @@ function getToken(scope, callback) {
     });
 }
 
-/*
+/**
 *   Create payment
 *
 *   @param data Payment object
 *   @param token Authorization token that was returned by getToken method
 *   @param callback Function to call after response recieved callback(err, data);
-
-
-    Minimal data object https://doc.gopay.com/cs/?shell#standardní-platba
-    {
-        "target": {
-            "type":"ACCOUNT",
-            "goid":"8123456789"
-        ,
-        "amount":"7000",
-        "currency":"CZK",
-        "order_number":"001",
-        "order_description":"pojisteni01"
-        "items":[
-            {"name":"item01","amount":"3500"},
-            {"name":"item02","amount":"3500"}
-        ],
-        "callback":{
-            "return_url":"http://www.eshop.cz/return",
-            "notification_url":"http://www.eshop.cz/notify"
-        },
-        "lang":"cs"
-    }
+*   @public
 */
 
 function createPayment(data, token, callback) {
@@ -152,6 +131,15 @@ function createPayment(data, token, callback) {
     });
 }
 
+/**
+*   Get payment status by id
+*
+*   @param id Payment ID
+*   @param token Auth token
+*   @param callback Function to call after response recieved callback(err, data);
+*   @public* 
+*/
+
 function getStatus(id, token, callback) {
     if (!token) return callback('Error: Token reguired');
     if (!id || id === '') return callback('Error: Payment ID reguired');
@@ -175,6 +163,14 @@ function getStatus(id, token, callback) {
         callback(null, body);
     });
 }
+
+/**
+*   Error handler
+*
+*   @param status Response status
+*   @param callback Function to call with error
+*   @public* 
+*/
 
 function statusError(status, callback) {
     var err;
