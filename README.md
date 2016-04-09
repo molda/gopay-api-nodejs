@@ -1,10 +1,12 @@
 # gopay-api-nodejs
 
+
+
 Not tested yet
 
 
 ### Usage
-```
+```javascript
 var GoPay = require('gopay');
 
 GoPay.init({
