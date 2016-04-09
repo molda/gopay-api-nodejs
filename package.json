@@ -1,0 +1,23 @@
+{
+  "name": "gopay-api-nodejs",
+  "version": "0.1.0",
+  "description": "GoPay payment gateway",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/molda/gopay-api-nodejs.git"
+  },
+  "keywords": [
+    "gopay",
+    "payment"
+  ],
+  "author": "Martin Smola <smola.martin@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/molda/gopay-api-nodejs/issues"
+  },
+  "homepage": "https://github.com/molda/gopay-api-nodejs#readme"
+}

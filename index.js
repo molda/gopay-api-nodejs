@@ -1,9 +1,9 @@
 /*
- *	GoPay module
+ *  GoPay module
  *  http://www.gopay.com
  *
- *	Docs
- *	https://doc.gopay.com/cs/
+ *  Docs
+ *  https://doc.gopay.com/cs/
  */
 
 var path = require('path');
@@ -14,13 +14,11 @@ var ready = false;
 var apiUrl = 'https://gate.gopay.cz/api';
 
 /*
- *	Init
+ *  Init
  *
- *	@param goid 
- *	@param clientID 
- *	@param clientSecret 
- *	@param returnUrl 
- *	@param notificationUrl 
+ *  @param clientID 
+ *  @param clientSecret 
+ *
  */
 
 exports.init = function(options, isDebug) {
@@ -28,14 +26,13 @@ exports.init = function(options, isDebug) {
     if (!options) throw new Error('Cannot initialized GoPay, options required!');
 
     var errors = [];
-    if (!options.goid) errors.push('goid');
     if (!options.clientID) errors.push('clientID');
     if (!options.clientSecret) errors.push('clientSecret');
-    if (!options.returnUrl) errors.push('returnUrl');
-    if (!options.notificationUrl) errors.push('notificationUrl');
     if (errors.length) throw new Error('Options "' + errors.join(', ') + '" required!');
 
     if (isDebug) apiUrl = 'https://gw.sandbox.gopay.com/api';
+
+    console.log('using apiUrl:', apiUrl)
 
     opts = options;
     ready = true;
@@ -48,15 +45,16 @@ exports.getStatus = getStatus;
 
 
 /*
- *	Get token
+ *  Get token
  *
- *	@param scope [optional] default 'payment-create', posssible values are 'payment-all' or 'payment-create'
- *	@param callback Function to call after response recieved callback(err, data);
- *	
- *	Response data object
- *	@param token_type	=bearer
- *	@param access_token =<new-token>
- *	@param expires_in	=1800
+ *  @param scope [optional] default 'payment-create', posssible values are 'payment-all' or 'payment-create'
+ *  @param callback Function to call after response recieved callback(err, data);
+ *  
+ *  Response data object
+ *  @param token_type   =bearer
+ *  @param access_token =<new-token>
+ *  @param expires_in   =1800
+ *
  */
 
 function getToken(scope, callback) {
@@ -75,13 +73,13 @@ function getToken(scope, callback) {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         form: {
-        	grant_type: 'client_credentials',
-        	scope: scope ? scope : 'payment-create'
+            grant_type: 'client_credentials',
+            scope: scope ? scope : 'payment-create'
         }
     };
     options.headers[clientID] = clientSecret;
 
-	request.post(options, function(err, response, body) {
+    request.post(options, function(err, response, body) {
 
         if (err) return callback(err);
         if (response.statusCode !== 200) return statusError(response.statusCode, callback);
@@ -94,30 +92,32 @@ function getToken(scope, callback) {
 }
 
 /*
-*	Create payment
+*   Create payment
 *
-*	@param data Payment object
-*	@param token Authorization token that was returned by getToken method
-*	@param callback Function to call after response recieved callback(err, data);
+*   @param data Payment object
+*   @param token Authorization token that was returned by getToken method
+*   @param callback Function to call after response recieved callback(err, data);
 
 
-	Minimal object https://doc.gopay.com/cs/?shell#standardní-platba
-	{
-	"target": {
-                "type":"ACCOUNT",
-                "goid":"8123456789"
-              },
-	"amount":"7000",
-	"currency":"CZK",
-	"order_number":"001",
-	"order_description":"pojisteni01"
-	"items":[{"name":"item01","amount":"3500"},
-             {"name":"item02","amount":"3500"}
-            ],
-    "callback":{
-                "return_url":"http://www.eshop.cz/return",
-                "notification_url":"http://www.eshop.cz/notify"
-              }
+    Minimal data object https://doc.gopay.com/cs/?shell#standardní-platba
+    {
+        "target": {
+            "type":"ACCOUNT",
+            "goid":"8123456789"
+        ,
+        "amount":"7000",
+        "currency":"CZK",
+        "order_number":"001",
+        "order_description":"pojisteni01"
+        "items":[
+            {"name":"item01","amount":"3500"},
+            {"name":"item02","amount":"3500"}
+        ],
+        "callback":{
+            "return_url":"http://www.eshop.cz/return",
+            "notification_url":"http://www.eshop.cz/notify"
+        },
+        "lang":"cs"
     }
 */
 
@@ -126,15 +126,6 @@ function createPayment(data, token, callback) {
     if (!ready) throw new Error('GoPay library not initialized!');
 
     if (!token || token === '') return callback('Error: Token reguired');
-
-    data.target = {
-        'type': 'ACCOUNT',
-        'goid': opts.goid
-    }
-    data.callback = {
-        return_url: opts.return_url,
-        notification_url: opts.notification_url
-    }
 
     var options = {
         url: apiUrl + '/payments/payment',
@@ -146,7 +137,7 @@ function createPayment(data, token, callback) {
     };
     options.headers['Authorization'] = 'Bearer ' + token;
 
-	request.post(options, function(err, response, body) {
+    request.post(options, function(err, response, body) {
 
         if (err) return callback(err);
         if (response.statusCode !== 200) return statusError(response.statusCode, callback);
@@ -171,7 +162,7 @@ function getStatus(id, token, callback) {
     };
     options.headers['Authorization'] = 'Bearer ' + token;
 
-	request.get(options, function(err, response, body) {
+    request.get(options, function(err, response, body) {
 
         if (err) return callback(err);
         if (response.statusCode !== 200) return statusError(response.statusCode, callback);
@@ -179,7 +170,6 @@ function getStatus(id, token, callback) {
         console.log(body);
 
         callback(null, body);
-
     });
 }
 
