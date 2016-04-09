@@ -89,7 +89,7 @@ function getToken(scope, callback) {
 
         console.log(body);
 
-        callback(null, body);
+        callback(null, body.access_token);
 
     });
 }
