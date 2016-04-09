@@ -7,6 +7,11 @@ Not tested yet
 ```
 var GoPay = require('gopay');
 
+GoPay.init({
+	clientID: 'xxxxxx'
+	clientSecret: 'xxxxxxx'
+});
+
 GoPay.getToken(scope, function(err, token){
 
 });
