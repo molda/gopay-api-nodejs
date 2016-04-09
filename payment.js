@@ -3,7 +3,7 @@
 *
 */
 
-// var p = new Payment()
+// var payment = new Payment()
 // 			.payer({contact: 'pepa'})
 // 			.target({type:'ACCOUNT'})
 // 			.amount(1000)
