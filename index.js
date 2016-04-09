@@ -8,6 +8,7 @@
 
 var path = require('path');
 var request = require('request');
+var Payment = require('payment.js');
 
 var opts = {}
 var ready = false;
@@ -42,6 +43,8 @@ exports.init = function(options, isDebug) {
 exports.getToken = getToken;
 exports.createPayment = createPayment;
 exports.getStatus = getStatus;
+
+exports.Payment = Payment;
 
 
 /*

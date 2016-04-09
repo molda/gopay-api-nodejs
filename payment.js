@@ -6,8 +6,17 @@
 // var p = new Payment()
 // 			.payer({contact: 'pepa'})
 // 			.target({type:'ACCOUNT'})
-// 			.amount("1000")
+// 			.amount(1000)
 // 			.currency("CZK")
+//          .orderNo("001")
+//          .orderDesc("pojisteni01")
+//          .items([{"name":"item01","amount":"500"}])
+//          .preAuth(true)
+//          .params([{"name":"invoicenumber", "value":"2015001003"}])
+//          .callback({
+// 	            "return_url":"http://www.eshop.cz/return",
+//              "notification_url":"http://www.eshop.cz/notify"
+//          })
 // 			.toObj();
 
 // console.log(p);
@@ -28,7 +37,7 @@ Payment.prototype.target  = function (data) {
 	return this;
 }
 Payment.prototype.amount  = function (data) {
-	this.payment.amount = data;
+	this.payment.amount = data.toString();
 	return this;
 }
 Payment.prototype.currency  = function (data) {
@@ -65,3 +74,20 @@ Payment.prototype.toObj  = function () {
 	return this.payment;
 }
 
+var p = new Payment()
+			.payer({contact: 'pepa'})
+			.target({type:'ACCOUNT'})
+			.amount('1000')
+			.currency("CZK")
+         .orderNo("001")
+         .orderDesc("pojisteni01")
+         .items([{"name":"item01","amount":"500"}])
+         .preAuth(true)
+         .params([{"name":"invoicenumber", "value":"2015001003"}])
+         .callback({
+	            "return_url":"http://www.eshop.cz/return",
+             "notification_url":"http://www.eshop.cz/notify"
+         })
+			.toObj();
+
+console.log(p);
