@@ -115,7 +115,7 @@ function createPayment(data, token, callback) {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        form: data
+        body: data
     };
     options.headers['Authorization'] = 'Bearer ' + token;
 
