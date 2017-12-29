@@ -4,24 +4,25 @@
 */
 
 // var payment = new Payment()
-// 			.payer({contact: 'pepa'})
-// 			.target({type:'ACCOUNT'})
-// 			.amount(1000)
-// 			.currency("CZK")
-//          .orderNo("001")
-//          .orderDesc("pojisteni01")
-//          .items([{"name":"item01","amount":"500"}])
-//          .preAuth(true)
-//          .params([{"name":"invoicenumber", "value":"2015001003"}])
-//          .callback({
-// 	            "return_url":"http://www.eshop.cz/return",
-//              "notification_url":"http://www.eshop.cz/notify"
-//          })
-// 			.toObj();
+// 	.payer({contact: { email: 'test@test.cz' }})
+// 	.target({
+// 		type:'ACCOUNT',
+// 		goid: gp.goid
+// 	})
+// 	.amount(1000)
+// 	.currency("CZK")
+// 	.orderNo("001")
+// 	.orderDesc("payment description")
+// 	.items([{ name:'item01', amount:1000 }])
+// 	.preAuth(true)
+// 	.additional_params([{"name":"invoicenumber", "value":"2015001003"}])
+// 	.callback({
+// 		"return_url":"http://www.eshop.cz/return",
+// 		"notification_url":"http://www.eshop.cz/notify"
+// 	})
+// 	.toObj();
 
-// console.log(p);
-
-module.eports = Payment;
+// console.log(payment);
 
 function Payment () {
 	this.payment = {};
@@ -60,8 +61,12 @@ Payment.prototype.preAuth  = function (data) {
 	this.payment.preauthorization = data;
 	return this;
 }
-Payment.prototype.params  = function (data) {
-	this.payment.params = data;
+Payment.prototype.additional_params  = function (data) {
+	this.payment.additional_params = data;
+	return this;
+}
+Payment.prototype.lang  = function (data) {
+	this.payment.lang = data;
 	return this;
 }
 
@@ -74,20 +79,4 @@ Payment.prototype.toObj  = function () {
 	return this.payment;
 }
 
-var p = new Payment()
-			.payer({contact: 'pepa'})
-			.target({type:'ACCOUNT'})
-			.amount('1000')
-			.currency("CZK")
-         .orderNo("001")
-         .orderDesc("pojisteni01")
-         .items([{"name":"item01","amount":"500"}])
-         .preAuth(true)
-         .params([{"name":"invoicenumber", "value":"2015001003"}])
-         .callback({
-	            "return_url":"http://www.eshop.cz/return",
-             "notification_url":"http://www.eshop.cz/notify"
-         })
-			.toObj();
-
-console.log(p);
+module.exports = Payment;

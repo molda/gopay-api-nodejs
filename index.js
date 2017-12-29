@@ -8,90 +8,92 @@
 
 var path = require('path');
 var request = require('request');
-var Payment = require('payment.js');
+var Payment = require('./payment.js');
 
 var opts = {}
 var ready = false;
-var apiUrl = 'https://gate.gopay.cz/api';
+var apiUrl = 'https://gw.sandbox.gopay.com/api';
 
 /**
  *  Init
  *
  *  @param clientID 
- *  @param clientSecret 
- *  @public
+ *  @param clientSecret
  */
 
-exports.init = function(options, isDebug) {
+exports.init = function(options, isProduction) {
 
-    if (!options) throw new Error('Cannot initialized GoPay, options required!');
+	if (!options) throw new Error('Cannot initialized GoPay, options required!');
 
-    var errors = [];
-    if (!options.clientID) errors.push('clientID');
-    if (!options.clientSecret) errors.push('clientSecret');
-    if (errors.length) throw new Error('Options "' + errors.join(', ') + '" required!');
+	var errors = [];
+	if (!options.clientID) errors.push('clientID');
+	if (!options.clientSecret) errors.push('clientSecret');
+	if (errors.length) throw new Error('Options "' + errors.join(', ') + '" required!');
 
-    if (isDebug) apiUrl = 'https://gw.sandbox.gopay.com/api';
+	if (isProduction) apiUrl = 'https://gate.gopay.cz/api';
 
-    console.log('using apiUrl:', apiUrl)
+	console.log('using apiUrl:', apiUrl)
 
-    opts = options;
-    ready = true;
-
+	opts = options;
+	ready = true;
 }
 
 exports.getToken = getToken;
 exports.createPayment = createPayment;
 exports.getStatus = getStatus;
-
 exports.Payment = Payment;
-
 
 /**
  *  Get token
  *
  *  @param scope [optional] default 'payment-create', posssible values are 'payment-all' or 'payment-create'
  *  @param callback Function to call after response recieved callback(err, data);
- *  @public
  *  
- *      Response data object
- *      @param token_type   =bearer
- *      @param access_token =<new-token>
- *      @param expires_in   =1800
+ *  Response data object
+ *    @param token_type   = bearer
+ *    @param access_token = <new-token>
+ *    @param expires_in   = 1800
  */
 
 function getToken(scope, callback) {
 
-    if (!ready) throw new Error('GoPay library not initialized!');
+	if (!ready) 
+		throw new Error('GoPay library not initialized!');
 
-    if (typeof scope == 'function') {
-        callback = scope;
-        scope = null;
-    }
+	if (typeof scope == 'function') {
+		callback = scope;
+		scope = null;
+	}
 
-    var options = {
-        url: gopayApiUrl + '/oauth2/token',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        form: {
-            grant_type: 'client_credentials',
-            scope: scope ? scope : 'payment-create'
-        }
-    };
-    options.headers[clientID] = clientSecret;
+	var options = {
+		url: apiUrl + '/oauth2/token',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Authorization': 'Basic ' + new Buffer(opts.clientID + ':' + opts.clientSecret).toString('base64')
+		},
+		form: {
+			grant_type: 'client_credentials',
+			scope: scope ? scope : 'payment-create'
+		}
+	};
 
-    request.post(options, function(err, response, body) {
+	request.post(options, function(err, response, body) {
 
-        if (err) return callback(err);
-        if (response.statusCode !== 200) return statusError(response.statusCode, callback);
+		if (err) 
+			return callback(err);
 
-        console.log(body);
+		if (response.statusCode !== 200) 
+			return statusError(response.statusCode, body, callback);
 
-        callback(null, body.access_token);
+		try {
+			body = JSON.parse(body);
+		} catch(err) {
+			return callback(err);
+		}
 
-    });
+		callback(null, body.access_token);
+	});
 }
 
 /**
@@ -100,35 +102,32 @@ function getToken(scope, callback) {
 *   @param data Payment object
 *   @param token Authorization token that was returned by getToken method
 *   @param callback Function to call after response recieved callback(err, data);
-*   @public
 */
 
 function createPayment(data, token, callback) {
 
-    if (!ready) throw new Error('GoPay library not initialized!');
+	if (!ready) 
+		throw new Error('GoPay library not initialized!');
 
-    if (!token || token === '') return callback('Error: Token reguired');
+	if (!token) 
+		return callback({ error: 'Error: Token reguired' });
 
-    var options = {
-        url: apiUrl + '/payments/payment',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: data
-    };
-    options.headers['Authorization'] = 'Bearer ' + token;
+	var options = {
+		url: apiUrl + '/payments/payment',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+			'Authorization': 'Bearer ' + token
+		},
+		json: data
+	};
 
-    request.post(options, function(err, response, body) {
+	request.post(options, function(err, response, body) {
+		if (err) return callback(err);
+		if (response.statusCode !== 200) return statusError(response.statusCode, body, callback);
 
-        if (err) return callback(err);
-        if (response.statusCode !== 200) return statusError(response.statusCode, callback);
-
-        console.log(body);
-
-        callback(null, body);
-
-    });
+		callback(null, body);
+	});
 }
 
 /**
@@ -136,59 +135,73 @@ function createPayment(data, token, callback) {
 *
 *   @param id Payment ID
 *   @param token Auth token
-*   @param callback Function to call after response recieved callback(err, data);
-*   @public* 
+*   @param callback Function to call after response recieved callback(err, data); 
 */
 
 function getStatus(id, token, callback) {
-    if (!token) return callback('Error: Token reguired');
-    if (!id || id === '') return callback('Error: Payment ID reguired');
 
-    var options = {
-        url: apiUrl + '/payments/payment' + id,
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    };
-    options.headers['Authorization'] = 'Bearer ' + token;
+	if (!ready) 
+		throw new Error('GoPay library not initialized!');
 
-    request.get(options, function(err, response, body) {
+	if (!token) 
+		return callback({ error: 'Error: Token reguired' });
 
-        if (err) return callback(err);
-        if (response.statusCode !== 200) return statusError(response.statusCode, callback);
+	if (!id) 
+		return callback({ error: 'Error: Payment ID reguired' });
 
-        console.log(body);
+	var options = {
+		url: apiUrl + '/payments/payment/' + id,
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Authorization': 'Bearer ' + token
+		}
+	};
 
-        callback(null, body);
-    });
+	request.get(options, function(err, response, body) {
+
+		if (err) return callback(err);
+		if (response.statusCode !== 200) return statusError(response.statusCode, body, callback);
+
+		try {
+			body = JSON.parse(body);
+		} catch(err) {
+			return callback(err);
+		}
+
+		callback(null, body);
+	});
 }
 
 /**
 *   Error handler
 *
 *   @param status Response status
+*   @param body Response body
 *   @param callback Function to call with error
-*   @public* 
 */
 
-function statusError(status, callback) {
-    var err;
-    switch (status) {
-        case '403':
-            err = 'GoPay::Unauthorized';
-            break;
-        case '409':
-            err = 'GoPay::Validation error';
-            break;
-        case '500':
-            err = 'GoPay::Internal server error';
-            break;
-        case '404':
-            err = 'GoPay::Not found';
-            break;
-        default:
-            err = 'GoPay::Error status->' + status;
-    }
-    callback('Error: Response status -> ' + err);
+function statusError(status, body, callback) {
+	var err;
+	switch (status) {
+		case 403:
+			err = 'GoPay::Unauthorized';
+			break;
+		case 409:
+			err = 'GoPay::Validation error';
+			break;
+		case 500:
+			err = 'GoPay::Internal server error';
+			break;
+		case 404:
+			err = 'GoPay::Not found';
+			break;
+		default:
+			err = 'GoPay::Error';
+	}
+	callback({
+		message: err,
+		status: status,
+		body: body
+	});
 }

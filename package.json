@@ -1,7 +1,7 @@
 {
   "name": "gopay-api-nodejs",
   "version": "0.1.0",
-  "description": "GoPay payment gateway",
+  "description": "GoPay implementation",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/molda/gopay-api-nodejs/issues"
   },
-  "homepage": "https://github.com/molda/gopay-api-nodejs#readme"
+  "homepage": "https://github.com/molda/gopay-api-nodejs#readme",
+  "dependencies": {
+    "request": "^2.83.0"
+  }
 }
